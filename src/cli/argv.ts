@@ -49,7 +49,7 @@ export default () => {
     .help('help').alias('help', 'h')
     .example('$0 db.json', '')
     .example('$0 --watch db.json', '')
-    .epilog('https://r35007.github.io/Mock-Server/')
+    .epilog('https://r35007.github.io/Mock-Server-Lite/')
     .version("1.0.1").alias('version', 'v').argv as Options;
 
   return options;
