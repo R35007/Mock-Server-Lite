@@ -6,7 +6,7 @@ Created with <3 for front-end developers who need a quick back-end for prototypi
 
 Now also available as a VSCodeExtension `thinker.mock-server-lite`.
 
-This is the lite version of MocK Server. 
+This is the lite version of [MocK Server](https://r35007.github.io/Mock-Server). 
 
 ## Table of contents
 
@@ -76,7 +76,7 @@ This is the lite version of MocK Server.
 Install Mock Server
 
 ```sh
-npm install -g @r35007/mock-server
+npm install -g @r35007/mock-server-lite
 ```
 
 Create a `db.json` file with some data.
@@ -112,7 +112,7 @@ npm install -g nodemon
 Create `server.js` File
 
 ```js
-const { MockServer } = require("@r35007/mock-server"); // use import if using ES6 module
+const { MockServer } = require("@r35007/mock-server-lite"); // use import if using ES6 module
 
 const mockServer = new MockServer("./config.json"); // Creates a Mock Server instance
 // or
@@ -683,7 +683,7 @@ https://r35007.github.io/Mock-Server/
 returns the instance of the mockServer.
 
 ```js
-const { MockServer } = require("@r35007/mock-server");
+const { MockServer } = require("@r35007/mock-server-lite");
 const mockServer = new MockServer("./config.json");
 ```
 
@@ -698,7 +698,7 @@ const mockServer = new MockServer("./config.json");
 returns the single instance of the mockServer.
 
 ```js
-const { MockServer } = require("@r35007/mock-server");
+const { MockServer } = require("@r35007/mock-server-lite");
 const mockServer = MockServer.Create("./config.json");
 ```
 
@@ -714,7 +714,7 @@ stops the server and clears the instance of the mockServer.
 returns promise
 
 ```js
-const { MockServer } = require("@r35007/mock-server");
+const { MockServer } = require("@r35007/mock-server-lite");
 await MockServer.Destroy();
 ```
 
@@ -966,7 +966,7 @@ const store = mockServer.getValidStore(store);
 
 **Sivaraman** - [sendmsg2siva.siva@gmail.com](sendmsg2siva.siva@gmail.com)
 
-- _GitHub_ - [https://github.com/R35007/Mock-Server](https://github.com/R35007/Mock-Server)
+- _GitHub_ - [https://github.com/R35007/Mock-Server-Lite](https://github.com/R35007/Mock-Server-Lite)
 
 ## License
 
