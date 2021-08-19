@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="./favicon.ico" type="image/x-icon">
+  <script src="https://kit.fontawesome.com/1515315868.js" crossorigin="anonymous"></script>
+  <title>Mock Server lite</title>
+  <link rel="stylesheet" href="./css/bootstrap.min.css">
+  <link rel="stylesheet" href="./css/style.css">
+  <script>
+    const $html = document.getElementsByTagName("html")[0];
+
+    const href = window.location.href;
+    const search = window.location.search;
+    let localhost = window.location.href.replace(search, "").slice(0, -1);
+    let urlParams = new URLSearchParams(search);
+
+    // Adjust screen size using query params. Used inside VS Code Extension.
+    const fontSize = urlParams.get("_fontSize");
+    $html.style.fontSize = fontSize;
+  </script>
+  <script src="./js/iframe-OnLoad-handler.js"></script>
+</head>
+
+<body>
+  <div id="container" class="d-flex w-100 h-100 overflow-hidden">
+    <div id="resources-container" class="position-relative">
+      <div id="toast" class="toast hide align-items-center text-white bg-success border-0 position-absolute"
+        role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+          <div class="toast-body"></div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+            aria-label="Close"></button>
+        </div>
+      </div>
+      <nav id="mock-server-nav-header" class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+          <a class="navbar-brand d-flex align-items-center text-light p-0" href="https://github.com/R35007/Mock-Server"
+            target="blank">
+            <img src="./mockserverlogo.png" class="d-inline-block align-text-top me-2" style="width: 1.5rem">
+            Mock Server Lite
+          </a>
+          <div>
+            <ul class="navbar-nav ms-auto mb-2 mb-lg-0 d-flex flex-row">
+              <li class="nav-item me-3">
+                <a class="nav-link py-0" href="https://github.com/R35007/Mock-Server" target="blank">
+                  <i class="fab fa-github-alt me-2"></i>GitHub
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link py-0" href="https://r35007.github.io/Mock-Server/" target="blank">
+                  <i class="fab fa-readme me-2"></i>Readme
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+      <main class="position-relative">
+        <nav class="navbar w-100 navbar-expand-lg navbar-light bg-light position-sticky top-0" style="z-index: 3;">
+          <div class="container-fluid">
+            <a class="navbar-brand p-0 m-0" href="#">
+              Resources
+            </a>
+            <h6 class="mb-0"><span id="resources-count" class="badge bg-secondary"
+                style="font-size: 0.7rem; margin: 0 1rem;"></span></h6>
+            <div class="flex-1">
+              <form class="d-flex align-items-center w-100 justify-content-end">
+                <input type="search" id="search" class="form-control bg-white search me-2" oninput="filterRoutes()"
+                  placeholder="Search resources here" aria-label="Search" />
+                <span role="button" class="px-2 pe-1 action-icon" title="refresh" onclick="init()"><i
+                    class="fas fa-sync-alt"></i></span>
+              </form>
+            </div>
+          </div>
+        </nav>
+        <div id="routes-list">
+          <ul id="resources-list" class="nav nav-pills my-3 mx-4 flex-column p-0"></ul>
+          <div id="rewriters-container" style="display: none">
+            <h5 class="mx-4">Route Rewriters</h5>
+            <ul id="rewriters-list" class="nav nav-pills my-3 mx-4 flex-column p-0"></ul>
+          </div>
+        </div>
+        <div class="footer">
+          <p>
+            <span>To access and modify resources, you can use any HTTP method:</span><br>
+            <span>
+              <code class="badge bg-secondary me-2">GET</code>
+              <code class="badge bg-secondary me-2">POST</code>
+              <code class="badge bg-secondary me-2">PUT</code>
+              <code class="badge bg-secondary me-2">PATCH</code>
+              <code class="badge bg-secondary me-2">DELETE</code>
+              <code class="badge bg-secondary me-2">OPTIONS</code>
+              <code class="badge bg-secondary me-2">HEAD</code>
+            </span>
+          </p>
+          <h2>Documentation</h2>
+          <p><a href="https://r35007.github.io/Mock-Server/" class="text-primary" style="text-decoration: underline;"
+              target="blank">README</a></p>
+          <p>
+            To replace this page, create a <code>./public/index.html</code> file.
+          </p>
+        </div>
+      </main>
+    </div>
+    <div id="separator"></div>
+    <div id="data-container" style="width: 50%;" class="position-relative">
+      <nav id="iframe-header" class="navbar navbar-expand-lg navbar-primary bg-primary p-1">
+        <div class="container-fluid p-0 flex-nowrap">
+          <a title="open in new tab" id="resource-redirect" class="btn btn-primary" target="_blank">
+            <i class="fas fa-external-link-alt"></i>
+          </a>
+          <input type="text" class="form-control bg-primary border-0 text-white"
+            placeholder="Type resource url here and press Enter to load the data" id="iframe-url">
+          <a title="download" id="download" class="btn btn-primary" download href="">
+            <i class="fas fa-download"></i>
+          </a>
+        </div>
+      </nav>
+      <main>
+        <div id="iframe-loader" class="loader-backdrop" style="display: none;">
+          <div class="loader-wrapper">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+            <div style="margin-left: 15px;">Processing...</div>
+          </div>
+        </div>
+        <iframe id="iframe-data" src="" class="w-100 h-100 d-block" frameborder="0"
+          onload="onIframeLoadHandler(this)"></iframe>
+      </main>
+    </div>
+  </div>
+  <script src="./js/bootstrap.bundle.min.js"></script>
+  <script src="./js/initializer.js"></script>
+  <script src="./js/utils.js"></script>
+  <script src="./js/split-screen.js"></script>
+  <script src="./js/info-box.js"></script>
+  <script src="./js/iframe-input-handler.js"></script>
+  <script src="./js/main.js"></script>
+</body>
+
+</html>
