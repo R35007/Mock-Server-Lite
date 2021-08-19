@@ -50,7 +50,7 @@ export default () => {
     .example('$0 db.json', '')
     .example('$0 --watch db.json', '')
     .epilog('https://r35007.github.io/Mock-Server/')
-    .version("1.0.0").alias('version', 'v').argv as Options;
+    .version("1.0.1").alias('version', 'v').argv as Options;
 
   return options;
 }
