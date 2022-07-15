@@ -49,8 +49,9 @@ export default () => {
     .help('help').alias('help', 'h')
     .example('$0 db.json', '')
     .example('$0 --watch db.json', '')
-    .epilog('https://r35007.github.io/Mock-Server-Lite/')
-    .version("1.0.1").alias('version', 'v').argv as Options;
+    .example('$0 http://jsonplaceholder.typicode.com/db', '')
+    .epilog('https://r35007.github.io/Mock-Server/')
+    .version("4.4.0").alias('version', 'v').argv as Options;
 
   return options;
 }

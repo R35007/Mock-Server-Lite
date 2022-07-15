@@ -1,12 +1,12 @@
 import * as fs from "fs";
 import * as path from "path";
-import { Config } from './model';
+import * as ValidTypes from './types/valid.types';
 
 const userDir = path.join(process.cwd(), 'public');
 const defaultDir = path.join(__dirname, '../../public');
 const staticDir = fs.existsSync(userDir) ? userDir : defaultDir;
 
-const Default_Config: Config = {
+export const Config: ValidTypes.Config = {
   port: 3000,
   host: "localhost",
   root: process.cwd(),
@@ -19,6 +19,9 @@ const Default_Config: Config = {
   noCors: false,
   noGzip: false,
   readOnly: false
-}
-
-export default Default_Config;
+};
+export const Middlewares: ValidTypes.Middlewares = {};
+export const Injectors: ValidTypes.Injectors = [];
+export const Rewriters: ValidTypes.Rewriters = {};
+export const Store: ValidTypes.Store = {};
+export const Db: ValidTypes.Db = {};

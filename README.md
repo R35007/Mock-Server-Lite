@@ -1,12 +1,12 @@
-# Mock Server Lite[](#mock-server-lite) [![](https://img.shields.io/npm/v/@r35007/mock-server-lite)](https://img.shields.io/npm/v/@r35007/mock-server?label=npm) [![](https://img.shields.io/npm/l/@r35007/mock-server?color=blue)](https://img.shields.io/npm/l/@r35007/mock-server?color=blue) [![](https://img.shields.io/npm/types/@r35007/mock-server)](https://img.shields.io/npm/types/@r35007/mock-server)
+# Mock Server Lite[](#mock-server-lite) [![](https://img.shields.io/npm/v/@r35007/mock-server-lite?label=npm)](https://img.shields.io/npm/v/@r35007/mock-server?label=npm) [![](https://img.shields.io/npm/l/@r35007/mock-server-lite?color=blue)](https://img.shields.io/npm/l/@r35007/mock-server?color=blue) [![](https://img.shields.io/npm/types/@r35007/mock-server-lite)](https://img.shields.io/npm/types/@r35007/mock-server)
 
 Get a full REST API with **zero coding** in **less than 30 seconds** (seriously)
 
 Created with <3 for front-end developers who need a quick back-end for prototyping and mocking.
 
-Now also available as a VSCodeExtension `thinker.mock-server-lite`.
+This is the lite version of [MocK Server](https://r35007.github.io/Mock-Server).
 
-This is the lite version of [MocK Server](https://r35007.github.io/Mock-Server). 
+**Note**: This lite version doesn't support db add, update, clone route in homepage, `fetch` related routeConfigs and helper middlewares like `_IterateResponse`, `_IterateRoutes` etc...
 
 ## Table of contents
 
@@ -15,21 +15,7 @@ This is the lite version of [MocK Server](https://r35007.github.io/Mock-Server).
 - [Route Config](#route-config)
   - [Set Delay Response](#set-delay-response)
   - [Set Custom StatusCode](#set-custom-statuscode)
-  - [Custom Mock](#custom-mock)
   - [Add Middleware](#add-middleware)
-- [Middleware Utils](#middleware-utils)
-  - [IterateResponse](#iterateresponse)
-  - [IterateRoutes](#iterateroutes)
-  - [AdvancedSearch](#advancedsearch)
-    - [Filter](#filter)
-    - [Paginate](#paginate)
-    - [Sort](#sort)
-    - [Slice](#slice)
-    - [Operators](#operators)
-    - [Full text search](#full-text-search)
-  - [CrudOperations](#crudoperations)
-  - [SetStoreDataToMock](#setstoredatatomock)
-  - [ReadOnly](#readonly)
 - [Injectors](#injectors)
   - [Inject Route Configs](#inject-route-configs)
   - [Override Existing Route Configs](#override-existing-route-configs)
@@ -41,13 +27,7 @@ This is the lite version of [MocK Server](https://r35007.github.io/Mock-Server).
 - [Locals](#locals)
   - [Dynamic Route Config](#dynamic-route-config)
 - [Config](#config)
-  - [Alternative Port](#config)
-  - [Set Host](#config)
-  - [Set RootPath to fetch Files](#config)
-  - [Add Base Route](#config)
-  - [Static File Server](#config)
 - [Default Routes](#default-routes)
-- [Home Page](#home-page)
 - [CLI Usage](#cli-usage)
 - [API](#api)
   - [MockServer](#mockserver)
@@ -59,7 +39,6 @@ This is the lite version of [MocK Server](https://r35007.github.io/Mock-Server).
   - [resources](#resources)
   - [defaultRoutes](#defaultroutes)
   - [addDbData](#adddbdata)
-  - [getDb](#getdb)
   - [startServer](#startserver)
   - [stopServer](#stopserver)
   - [resetServer](#resetserver)
@@ -76,7 +55,7 @@ This is the lite version of [MocK Server](https://r35007.github.io/Mock-Server).
 Install Mock Server
 
 ```sh
-npm install -g @r35007/mock-server-lite
+npm install -g @r35007/mock-server
 ```
 
 Create a `db.json` file with some data.
@@ -112,7 +91,7 @@ npm install -g nodemon
 Create `server.js` File
 
 ```js
-const { MockServer } = require("@r35007/mock-server-lite"); // use import if using ES6 module
+const { MockServer } = require("@r35007/mock-server"); // use import if using ES6 module
 
 const mockServer = new MockServer("./config.json"); // Creates a Mock Server instance
 // or
@@ -120,8 +99,8 @@ const mockServer = new MockServer("./config.json"); // Creates a Mock Server ins
 
 mockServer.launchServer(
   "./db.json",
-  "./middleware.js",
   "./injectors.json",
+  "./middleware.js",
   "./rewriters.json",
   "./store.json"
 ); // Starts the Mock Server.
@@ -138,8 +117,8 @@ app.use(defaults);
 
 const resources = mockServer.resources(
   "./db.json",
-  "./middleware.js",
   "./injectors.json",
+  "./middleware.js",
   "./store.json"
 );
 app.use(resources);
@@ -172,12 +151,11 @@ For Example:
   "/route/1, /route/2": {
     // /route/1 and /route/2 shares the same config and mock data
     "_config": true, // Make sure to set this to true to use this object as a route configuration.
-    "id": "id-unique", // sets a unique id for each route
+    "id": "id-unique", // sets a base64 encoded route
     "description": "", // Description about this Route.
     "delay": 2000, // in milliseconds
     "statusCode": 200, // in number between 100 to 600
-    "middlewareNames": ["_IterateResponse"], // list of middleware names to be called
-    "middlewares": "", // Can give a list of express Middlewares If using in .js file
+    "middlewares": ["CustomLog"], // list of middleware names to be called
     "mock": [{ "name": "foo" }, { "name": "bar" }],
     "store": {} // helps to store any values for later use
   },
@@ -234,7 +212,7 @@ You can add n number of middleware to a route which helps you to manipulate or l
 exports.DataWrapper = (req, res, next) => {
   res.locals.data = {
     status: "Success",
-    message: "Retrived Successfully",
+    message: "Retrieved Successfully",
     result: res.locals.data,
   };
   next();
@@ -245,186 +223,17 @@ exports.DataWrapper = (req, res, next) => {
 
 ```jsonc
 {
-  "/customMiddleware": {
+  "/users/customMiddleware": {
     "_config": true,
     "description": "Note: This middleware must be available in the 'middleware.js' by the below given names. This 'DataWrapper' will be called on every hit of this route.",
-    "mock": "This data will be wrapped by the middleware response object",
-    "middlewareNames": ["DataWrapper"]
+    "mock": { "name": "foo" },
+    "middlewares": ["DataWrapper"]
   }
 }
 ```
 
-Note: A middleware must be available at the name of the middlewareNames given in `db.json`
-[http://localhost:3000/customMiddleware](http://localhost:3000/customMiddleware).
-
-## **Middleware Utils**
-
-Use the predefined middleware to speedup your development and for ease of access.
-
-### **IterateResponse**
-
-setting middleware to `_IterateResponse` helps to send you a iterate the response one after the other in the mock array for each url hit.
-
-example:
-
-```jsonc
-{
-  "/middleware/utils/example/_IterateResponse": {
-    "_config": true,
-    "description": "This route iterates through each data. Try to hit again to see the data change. Note: The data must be of type array",
-    "mock": [
-      {
-        "userId": 1,
-        "id": 1,
-        "title": "Lorem ipsum dolor sit.",
-        "body": "Lorem ipsum dolor sit amet consectetur adipisicing elit. Est, dolorem."
-      },
-      {
-        "userId": 1,
-        "id": 2,
-        "title": "Lorem ipsum dolor sit.",
-        "body": "Lorem ipsum dolor sit amet consectetur adipisicing elit. Est, dolorem."
-      },
-      {
-        "userId": 1,
-        "id": 3,
-        "title": "Lorem ipsum dolor sit.",
-        "body": "Lorem ipsum dolor sit amet consectetur adipisicing elit. Est, dolorem."
-      }
-    ],
-    "middlewareNames": ["_IterateResponse"]
-  }
-}
-```
-
-Now go and hit [http://localhost:3000/middleware/utils/example/\_IterateResponse](http://localhost:3000/middleware/utils/example/_IterateResponse). For each hit you will get the next object in an array from the photos data.
-
-### **IterateRoutes**
-
-setting middleware to `_IterateRoutes` helps to send you a iterate the route one after the other in the mock array for each url hit.
-
-example:
-
-```jsonc
-{
-  "/middleware/utils/example/_IterateRoutes": {
-    "_config": true,
-    "description": "This route iterates through each route provide in the mock. Try to hit again to see the route change. Note: The data must be of type array",
-    "mock": ["/injectors/1", "/injectors/2"],
-    "middlewareNames": ["_IterateRoutes"]
-  },
-  "/injectors/1": "/injectors/1 data",
-  "/injectors/2": "/injectors/2 data"
-}
-```
-
-Now go and hit [http://localhost:3000/middleware/utils/example/\_IterateRoutes](http://localhost:3000/middleware/utils/example/_IterateRoutes). For each hit the route is passed to next matching url provided in the mock list.
-
-### **AdvancedSearch**
-
-`_AdvancedSearch` middleware helps to filter and do the advanced search from data.Following are the operations performed by this method.
-
-#### Filter
-
-Use `.` to access deep properties
-
-```
-GET /posts?title=mock-server&author=typicode
-GET /posts?id=1&id=2
-GET /comments?author.name=typicode
-```
-
-#### Paginate
-
-Use `_page` and optionally `_limit` to paginate returned data.
-
-In the `Link` header you'll get `first`, `prev`, `next` and `last` links.
-
-```
-GET /posts?_page=7
-GET /posts?_page=7&_limit=20
-```
-
-_10 items are returned by default_
-
-#### Sort
-
-Add `_sort` and `_order` (ascending order by default)
-
-```
-GET /posts?_sort=views&_order=asc
-GET /posts/1/comments?_sort=votes&_order=asc
-```
-
-For multiple fields, use the following format:
-
-```
-GET /posts?_sort=user,views&_order=desc,asc
-```
-
-#### Slice
-
-Add `_start` and `_end` or `_limit` (an `X-Total-Count` header is included in the response)
-
-```
-GET /posts?_start=20&_end=30
-GET /posts/1/comments?_start=20&_end=30
-GET /posts/1/comments?_start=20&_limit=10
-```
-
-_Works exactly as [Array.slice](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Array/slice) (i.e. `_start` is inclusive and `_end` exclusive)_
-
-#### Operators
-
-Add `_gte` or `_lte` for getting a range
-
-```
-GET /posts?views_gte=10&views_lte=20
-```
-
-Add `_ne` to exclude a value
-
-```
-GET /posts?id_ne=1
-```
-
-Add `_like` to filter (RegExp supported)
-
-```
-GET /posts?title_like=server
-```
-
-#### Full text search
-
-Add `q` or `_text`
-
-```
-GET /posts?q=internet&_text=success
-```
-
-### **CrudOperations**
-
-`_CrudOperations` middleware handles all the crud operations of the given data.
-By default it also handles the `_AdvancedSearch` operations.
-Note : the mock must of type Array of objects and must contain a unique value of attribute `id`.
-this `id` attribute can also be changes using `config.id`.
-
-For example: `config.json`
-
-```jsonc
-{
-  "id": "_id"
-}
-```
-
-### **SetStoreDataToMock**
-
-`_SetStoreDataToMock` sets every store data to Mock data.
-This overrides the existing mock with the `store`.
-
-### **ReadOnly**
-
-`_ReadOnly` forbidden every Http method calls except `GET` call.
+Note: A middleware must be available at the name of the middlewares given in `db.json`
+[http://localhost:3000/users/customMiddleware](http://localhost:3000/users/customMiddleware).
 
 ## **Injectors**
 
@@ -434,7 +243,7 @@ Injector uses [`path-to-regexp`](https://github.com/pillarjs/path-to-regexp) pat
 
 ### **Inject Route Configs**
 
-Here we are explicitly injecting `delay`, `middlewareNames`, `statusCode` to the `/posts` route.
+Here we are explicitly injecting `delay`, `middlewares`, `statusCode` to the `/posts` route.
 You can any route configs to a specific or to a group of routes using Injectors.
 
 - Injectors use `path-to-regexp` package for route pattern recognition.
@@ -445,7 +254,7 @@ example : `injectors.json`
 ```jsonc
 [
   {
-    "routeToMatch": "/injectors/:id",
+    "routes": ["/injectors/:id"],
     "description": "This description is injected using the injectors by matching the pattern '/injectors/:id'."
   }
 ]
@@ -462,26 +271,26 @@ For example :
 ```jsonc
 [
   {
-    "routeToMatch": "/injectors/2",
+    "routes": ["/injectors/2"],
     "override": true,
     "mock": "This data is injected using the injectors by matching the pattern '/injectors/2'."
   },
   {
-    "routeToMatch": "/injectors/:id",
+    "routes": ["/injectors/:id"],
     "override": true,
     "exact": true,
     "statusCode": 200,
     "mock": "This data is injected using the injectors by exactly matching the route '/injectors/:id'."
   },
   {
-    "routeToMatch": "/(.*)",
+    "routes": ["/(.*)"],
     "override": true,
-    "middlewareNames": ["...", "CustomLog"]
+    "middlewares": ["...", "CustomLog"]
   }
 ]
 ```
 
-Note: Use `["..."]` If you want to add the existing middlewareNames.
+Note: Use `["..."]` If you want to add the existing middlewares.
 
 ### **Common Route Configs**
 
@@ -495,13 +304,13 @@ For example :
 ```jsonc
 [
   {
-    "routeToMatch": "/(.*)",
+    "routes": ["/(.*)"],
     "description": "This Description is injected using the injectors. Set 'Override' flag to true to override the existing config values."
   },
   {
-    "routeToMatch": "/(.*)",
+    "routes": ["/(.*)"],
     "override": true,
-    "middlewareNames": ["...", "CustomLog"]
+    "middlewares": ["...", "CustomLog"]
   }
 ]
 ```
@@ -518,12 +327,10 @@ Route store helps to store any values which can be accessed on by that particula
 This stores values cannot be able to accessed by the other routes.
 Route Store can be accessed using `res.locals.routeConfig.store` inside the middleware.
 
-The middlewareNames `_CrudOperations`, `_IterateRoutes`, `_IterateResponse` uses the Route store to manipulate response.
-
 ### **Local Store**
 
 Local Store helps to store and share data between routes.
-This can be accessed using `res.locals.store` inside the middleware.
+This can be accessed using `res.locals.getStore()` inside the middleware.
 
 ## **Route Rewriters**
 
@@ -547,8 +354,8 @@ Create a `rewriters.json` file. Pay attention to start every route with `/`.
 const mockServer = MockServer.Create();
 mockServer.launchServer(
   "./db.json",
-  "./middleware.js",
   "./injectors.json",
+  "./middleware.js",
   "./rewriters.json"
 );
 ```
@@ -565,7 +372,7 @@ Now you can access resources using additional routes.
 
 ## **Locals**
 
-`res.locals` helps to access the current route config, `mock`, `statusCode` etc..
+`res.locals` helps to access the current route config, `store` etc..
 Here are the available options in `res.locals`
 
 ```ts
@@ -575,35 +382,17 @@ interface Locals {
     _config?: boolean;
     id?: string;
     description?: string;
-    statusCode?: number;
-    delay?: number;
     mock?: any;
     store?: object;
-    middlewareNames?: string[];
-    middlewares?: Array<express.RequestHandler>;
+    statusCode?: number;
+    delay?: number;
+    middlewares?: string[] | Array<express.RequestHandler>;
   };
   data: any; // response will be sent using this attribute value.
-  store: object;
-  getDb: (ids?: string[], routePaths?: string[]) => Routes; // This method helps to get other route configs and values.
   config: Config; // gives you the current mock server configuration.
+  getStore: () => object;
+  getDb: () => object;
 }
-```
-
-### **Dynamic Route Config**
-
-RouteConfigs are mutable. Means we can able to modify the routeConfigs in runtime using middleware.
-For Example:
-
-`middleware.js`
-
-```js
-exports._Status500 = (_req, res, next) => {
-  const locals = res.locals;
-  const routeConfig = locals.routeConfig;
-  routeConfig.statusCode = 500;
-  routeConfig.mock = "Failed Response";
-  next();
-};
 ```
 
 ## **Config**
@@ -638,10 +427,8 @@ new MockServer(config).launchServer("./db.json");
 - `Db` - [http://localhost:3000/\_db](http://localhost:3000/_db)
 - `Rewriters` - [http://localhost:3000/\_rewriters](http://localhost:3000/_rewriters)
 - `Store` - [http://localhost:3000/\_store](http://localhost:3000/_store)
-
-## **Home Page**
-
-![Home Page](https://r35007.github.io/Mock-Server/src/img/homePage.png)
+- `Reset Db` - [http://localhost:3000/\_reset/db](http://localhost:3000/_reset/db)
+- `Reset Store` - [http://localhost:3000/\_reset/store](http://localhost:3000/_reset/store)
 
 ## CLI Usage
 
@@ -683,7 +470,7 @@ https://r35007.github.io/Mock-Server/
 returns the instance of the mockServer.
 
 ```js
-const { MockServer } = require("@r35007/mock-server-lite");
+const { MockServer } = require("@r35007/mock-server");
 const mockServer = new MockServer("./config.json");
 ```
 
@@ -698,7 +485,7 @@ const mockServer = new MockServer("./config.json");
 returns the single instance of the mockServer.
 
 ```js
-const { MockServer } = require("@r35007/mock-server-lite");
+const { MockServer } = require("@r35007/mock-server");
 const mockServer = MockServer.Create("./config.json");
 ```
 
@@ -714,8 +501,13 @@ stops the server and clears the instance of the mockServer.
 returns promise
 
 ```js
-const { MockServer } = require("@r35007/mock-server-lite");
+const { MockServer } = require("@r35007/mock-server");
+const mockServer = MockServer.Create();
 await MockServer.Destroy();
+
+// or
+// pass a mock server instance to destroy
+await MockServer.Destroy(mockServer);
 ```
 
 ### **launchServer**
@@ -725,8 +517,8 @@ It validates all the params in the MockServer, loads the resources and starts th
 ```js
 mockServer.launchServer(
   "./db.json",
-  "./middleware.js", // middleware must be of type .js
   "./injectors.json",
+  "./middleware.js",
   "./rewriters.json",
   "./store.json"
 );
@@ -737,8 +529,8 @@ mockServer.launchServer(
 | Name       | Type            | Required | Description                                             |
 | ---------- | --------------- | -------- | ------------------------------------------------------- |
 | db         | string / object | No       | This object generates the local rest api.               |
-| middleware | string / object | No       | Here you initialize the needed custom middleware        |
 | injectors  | string / object | No       | Helps to inject a route configs for the existing routes |
+| middleware | string / object | No       | Here you initialize the needed custom middleware        |
 | rewriters  | string / object | No       | Helps to set route rewriters                            |
 | store      | string / object | No       | Helps to store values and share between routes          |
 
@@ -782,8 +574,8 @@ Sets the routes and returns the resources router.
 ```js
 const resources = mockServer.resources(
   "./db.json",
-  "./middleware.js",
   "./injectors.json",
+  "./middleware.js",
   "./store.json"
 );
 app.use(resources);
@@ -794,8 +586,8 @@ app.use(resources);
 | Name       | Type            | Required | Description                                             |
 | ---------- | --------------- | -------- | ------------------------------------------------------- |
 | db         | string / object | No       | This object generates the local rest api.               |
-| middleware | string / object | No       | Here you initialize the needed custom middleware        |
 | injectors  | string / object | No       | Helps to inject a route configs for the existing routes |
+| middleware | string / object | No       | Here you initialize the needed custom middleware        |
 | store      | string / object | No       | Helps to store values and share between routes          |
 
 ### **defaultRoutes**
@@ -820,21 +612,6 @@ mockServer.addDbData(db);
 | Name | Type   | Required | Description                             |
 | ---- | ------ | -------- | --------------------------------------- |
 | db   | object | No       | Give the new data to add to existing Db |
-
-### **getDb**
-
-Returns the routes
-
-```js
-const routes = mockServer.getDb(); // If param is not present return all the route values
-```
-
-**`Params`**
-
-| Name       | Type     | Required | Description             |
-| ---------- | -------- | -------- | ----------------------- |
-| ids        | string[] | No       | Give List of route ids  |
-| routePaths | string[] | No       | Give List of routePaths |
 
 ### **startServer**
 
@@ -868,7 +645,6 @@ By default this method will be called on `mockServer.stopServer()` method.
 mockServer.resetServer();
 ```
 
-
 ### **pageNotFound**
 
 It is a middleware to handle a page not found error.
@@ -897,11 +673,11 @@ mockServer.setData(db, middleware, injectors, rewriters, store, config);
 //or
 
 mockServer.setConfig(config);
-mockServer.setMiddleware(middleware);
+mockServer.setMiddlewares(middlewares);
 mockServer.setInjectors(injectors);
 mockServer.setRewriters(rewriters);
 mockServer.setStore(store);
-mockServer.setDb(Db, Injectors, options, entryCallBack, finallCallback);
+mockServer.setDb(Db, { reverse });
 ```
 
 **`Params`**
@@ -935,31 +711,36 @@ const initialStore = mockServer.initialStore;
 These helps to return a valid data from provided file path or object.
 
 ```js
-// called only when the given data is in .Har format and called at each entry
-const entryCallback = (entry, routePath, routeConfig) => {
-  return { [routePath]: routeConfig };
-};
-// called only when the given data is in .Har format and called at end of the entry loop
-const finalCallBack = (data, db) => {
-  return db; // what ever you return here will be given back
-};
+const {
+  getValidDb,
+  getValidMiddlewares,
+  getValidInjectors,
+  getValidRewriters,
+  getValidConfig,
+  getValidStore,
+  getValidRouteConfig,
+} = require("@r35007/mock-server/dist/server/utils/validators");
 
 const options = {
   reverse: true, // If true the db will be generated in reverse order
 };
 
-const db = mockServer.getValidDb(
-  "db.json",
-  "injectors.json",
-  options,
-  entryCallback,
-  finalCallBack
-);
-const middleware = mockServer.getValidMiddleware(middleware);
-const injectors = mockServer.getValidInjectors(injectors);
-const rewriters = mockServer.getValidRewriters(rewriters);
-const config = mockServer.getValidConfig(config);
-const store = mockServer.getValidStore(store);
+const rootPath = "./";
+
+const db = getValidDb(
+  "db.json", // db or HAR
+  [], // injectors
+  rootPath, // Root path to fetch the db.json file
+  options
+); // returns valid Db combined with the given injectors. Also helps to extract a db from HAR file. internally use getValidRouteConfig
+const middleware = getValidMiddlewares(middlewares, rootPath); // returns a valid middleware along with the default middlewares
+const injectors = getValidInjectors(injectors, rootPath); // returns a valid injectors. internally use getValidInjectorConfig
+const rewriters = getValidRewriters(rewriters, rootPath); // returns a valid rewriters
+const config = getValidConfig(config, rootPath); // returns a valid config combined with the default configs
+const store = getValidStore(store, rootPath); // returns a valid store
+const routeConfig = getValidRouteConfig(route, routeConfig); // returns a valid route config used by getValidDb
+const injectorConfig = getValidInjectorConfig(route, routeConfig); // returns a valid injectorsConfig used by getValidInjectors
+const route = getValidRoute(route); // splits route by comma and adds a slash ('/') prefix to the routes
 ```
 
 ## Author

@@ -56,13 +56,11 @@ function orderRouteConfig(routeConfig) {
     "id",
     "_isDefault",
     "description",
-    "middlewareNames",
+    "middlewares",
     "statusCode",
     "delay",
     "mock",
     "store",
-    "status",
-    "message",
   ]
 
   const routeConfigKeys = Object.keys(routeConfig);
